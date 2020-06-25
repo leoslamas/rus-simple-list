@@ -15,6 +15,7 @@ impl<T> LinkedList<T> {
             head: None,
         }
     }
+    
     pub fn add(&mut self, item: T) {
         let mut last = &mut self.head;
 

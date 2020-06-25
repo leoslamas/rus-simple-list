@@ -20,8 +20,6 @@ fn main() {
 
     my_list.pop();
 
-    //my_list.del(1);
-
     for i in my_list.iter() {
         println!("Borrowing: {}", i)
     }
