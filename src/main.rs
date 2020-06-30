@@ -18,7 +18,16 @@ fn main() {
 
     println!("List: {:?}", my_list);
 
-    my_list.pop();
+    let pop = my_list.pop();
+    println!("Pop: {}", pop.unwrap());
+
+    for i in my_list.iter() {
+        println!("Borrowing: {}", i)
+    }
+
+    println!("List: {:?}", my_list);
+
+    my_list.del(1);
 
     for i in my_list.iter() {
         println!("Borrowing: {}", i)

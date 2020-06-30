@@ -1,12 +1,14 @@
 #[derive(Debug, PartialEq)]
 struct Node<T> {
     item: T,
-    next: Option<Box<Node<T>>>,
+    next: Link<T>
 }
+
+type Link<T> = Option<Box<Node<T>>>;
 
 #[derive(Debug, PartialEq)]
 pub struct LinkedList<T> {
-    head: Option<Box<Node<T>>>
+    head: Link<T>
 }
 
 impl<T> LinkedList<T> {
@@ -15,7 +17,6 @@ impl<T> LinkedList<T> {
             head: None,
         }
     }
-    
     pub fn add(&mut self, item: T) {
         let mut last = &mut self.head;
 
@@ -23,9 +24,9 @@ impl<T> LinkedList<T> {
             last = &mut node.next;
         }
 
-        let node = Box::new(Node {
+        let node = Box::new(Node{
             item: item,
-            next: None,
+            next: None 
         });
 
         *last = Some(node);
@@ -46,21 +47,37 @@ impl<T> LinkedList<T> {
         None
     }
 
-    pub fn del(&mut self, _index: u32) {
-        unimplemented!()
+    pub fn del(&mut self, index: u32) {
+        let mut tmp = &mut self.head;
+        let mut target: Link<T>;
+        let mut counter = 0;
+        
+        if index == 0 {
+            self.pop();
+            return
+        }
+
+        while let Some(prev) = tmp {
+            if counter == index-1 {
+                target = prev.next.take();
+                
+                if let Some(t) = target {
+                    prev.next = t.next;
+                    return
+                }
+            } 
+
+            tmp = &mut prev.next;
+            counter += 1;
+        }
     }
     
     pub fn pop(&mut self) -> Option<T> {
-        let mut result: Option<T> = None;
-        
         self.head.take().map(|head| {
             let head = *head;
             self.head = head.next;
-
-            result = Some(head.item);
-        });
-        
-        result
+            head.item
+        })
     }
 
     pub fn size(&self) -> u32 {
@@ -86,7 +103,7 @@ pub struct Iter<'a, T> {
     next: Option<&'a Node<T>>,
 }
 
-impl<'a, T> Iterator for Iter<'a, T> {
+impl<'a, T> Iterator for Iter<'a,  T> {
     type Item = &'a T;
     fn next(&mut self) -> Option<Self::Item> {
         self.next.map(|node| {
@@ -181,20 +198,30 @@ mod tests {
         assert_eq!(Some(&10), e2);
         assert_eq!(Some(&100), e3);
 
-        let e4 = list.pop();
+        let e4 = list.pop(); // pop
 
-        assert_eq!(2, list.size());
+        assert_eq!(2, list.size()); // size 2
         assert_eq!(Some(1), e4);
 
-        let e4 = list.get(0);
-        let e5 = list.get(1);
+        let e4 = list.get(0); // 10
+        let e5 = list.get(1); // 100
 
         assert_eq!(Some(&10), e4);
         assert_eq!(Some(&100), e5);
+
+        let e5 = list.pop(); //pop
+
+        assert_eq!(1, list.size()); // size 1
+        assert_eq!(Some(10), e5);
+
+        let e6 = list.get(0); // 100
+        let e7 = list.get(1); // None
+
+        assert_eq!(Some(&100), e6);
+        assert_eq!(None, e7);
     }
 
     #[test]
-    #[ignore]
     fn test_should_del_element_by_index() {
         let mut list = setup();
 
@@ -203,17 +230,47 @@ mod tests {
         let e3 = list.get(2);
 
         assert_eq!(Some(&1), e1);
-        assert_eq!(Some(&100), e3);
         assert_eq!(Some(&10), e2);
+        assert_eq!(Some(&100), e3);
 
         list.del(1);
 
-        let e4 = list.get(0);
-        let e5 = list.get(1);
-        let e6 = list.get(2);
+        let e1 = list.get(0);
+        let e2 = list.get(1);
+        let e3 = list.get(2);
 
-        assert_eq!(Some(&1), e4);
-        assert_eq!(Some(&100), e5);
-        assert_eq!(None, e6);
+        assert_eq!(Some(&1), e1);
+        assert_eq!(Some(&100), e2);
+        assert_eq!(None, e3);
+
+        list.del(2);
+
+        let e1 = list.get(0);
+        let e2 = list.get(1);
+        let e3 = list.get(2);
+
+        assert_eq!(Some(&1), e1);
+        assert_eq!(Some(&100), e2);
+        assert_eq!(None, e3);
+
+        list.del(0);
+
+        let e1 = list.get(0);
+        let e2 = list.get(1);
+        let e3 = list.get(2);
+
+        assert_eq!(Some(&100), e1);
+        assert_eq!(None, e2);
+        assert_eq!(None, e3);
+
+        list.del(0);
+
+        let e1 = list.get(0);
+        let e2 = list.get(1);
+        let e3 = list.get(2);
+
+        assert_eq!(None, e1);
+        assert_eq!(None, e2);
+        assert_eq!(None, e3);
     }
 }
