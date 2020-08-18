@@ -4,6 +4,7 @@
 
 ```
  cargo test
+ cargo bench
 ```
 
 ## Run
