@@ -1,4 +1,4 @@
-use list_test::LinkedList;
+use simple_list::LinkedList;
 
 fn main() {
     let mut my_list = LinkedList::<i32>::new();
